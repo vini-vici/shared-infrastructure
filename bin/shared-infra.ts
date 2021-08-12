@@ -2,20 +2,31 @@
 import 'source-map-support/register';
 import * as cdk from '@aws-cdk/core';
 import { SharedInfraStack } from '../lib/shared-infra-stack';
+import accounts from '../lib/accounts.json';
 
 const app = new cdk.App();
-new SharedInfraStack(app, 'SharedInfraStack', {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+function createDevStack() {
+  const { ACCOUNT_ID } = process.env;
+  if(ACCOUNT_ID) {
+    new SharedInfraStack(app, `SharedInfra-${ACCOUNT_ID}-us-west-1`, {
+      stage: 'alpha',
+      env: {
+        account: ACCOUNT_ID,
+        region: 'us-west-1'
+      }
+    })
+  }
+}
 
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
+createDevStack();
 
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
-});
+for(const acc of accounts) {
+  new SharedInfraStack(app, `SharedInfra-${acc.accountId}-${acc.region}`, {
+    stage: acc.stage,
+    env: {
+      account: acc.accountId,
+      region: acc.region
+    }
+  });
+}
