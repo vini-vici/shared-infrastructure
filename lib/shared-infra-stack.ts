@@ -81,5 +81,10 @@ export class SharedInfraStack extends cdk.Stack {
       value: userPoolDomain.baseUrl()
     });
 
+    new cdk.CfnOutput(this, 'UserPoolArn', {
+      exportName: 'UserPoolArn',
+      value: userPool.userPoolArn
+    });
+
   }
 }
